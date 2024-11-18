@@ -1,0 +1,51 @@
+version: 2
+sources:
+  - name: dwh
+    tables:
+      - name: scd2_plus_staging_data
+        columns:
+          - name: Id
+          - name: Name
+          - name: Label
+          - name: Description
+          - name: Amount
+          - name: SourceSystem_UpdatedDate     
+          - name: Staging_LoadDate   
+          - name: Comment  
+      - name: dim_scd2_plus_full_config_test_data
+        columns:
+          - name: component_id
+          - name: valid_from_dt
+          - name: valid_to_dt
+          - name: version
+          - name: id
+          - name: label
+          - name: amount
+          - name: name
+          - name: birthdaydate
+          - name: description
+          - name: loaded_at
+          - name: updated_at
+          - name: scd_hash             
+
+models:
+  - name: dim_scd2_plus_full_config
+    tests:
+      - dbt_scd2_plus.scd2_plus_validation:
+          unique_key: 'id'
+          scd_valid_from_col_name: 'valid_from_dt'
+          scd_valid_to_col_name:  'valid_to_dt' 
+      - dbt_utils.equality:
+          compare_model: ref('dim_scd2_plus_full_config_test_data')
+          compare_columns:
+            - component_id
+            - valid_from_dt
+            - valid_to_dt      
+            - version
+            - id          
+            - label    
+            - amount
+            - name        
+            - birthdaydate   
+            - description                                         
+          precision: 4                    
