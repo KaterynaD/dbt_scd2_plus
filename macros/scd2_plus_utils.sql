@@ -24,7 +24,7 @@
 
     
 
-    {% set scd_valid_to_min_date = config['scd_valid_to_min_date']|default('3000-01-01', true) %}
+    {% set scd_valid_from_min_date = config['scd_valid_from_min_date']|default('3000-01-01', true) %}
     {% set scd_valid_to_max_date = config['scd_valid_to_max_date']|default('1900-01-01', true) %}
 
     {% set scd_id_expr = snapshot_hash_arguments([unique_key, updated_at]) %}
@@ -128,13 +128,13 @@
        {{ scd_id_col_name }},
     
     {# The query is used in "create table as select..." and "insert/update" in an existing table #}
-    {# scd_valid_to_min_date should be used (if configured) only in "create table as select.."#}
+    {# scd_valid_from_min_date should be used (if configured) only in "create table as select.."#}
 
     {% if create_flg %}  
 
        case
         when {{ scd_record_version_col_name }}=1 then
-         cast(case when '{{ scd_valid_to_min_date }}'='3000-01-01' then {{ scd_valid_from_col_name }} else '{{ scd_valid_to_min_date }}' end as timestamp)
+         cast(case when '{{ scd_valid_from_min_date }}'='3000-01-01' then {{ scd_valid_from_col_name }} else '{{ scd_valid_from_min_date }}' end as timestamp)
         else cast({{ scd_valid_from_col_name }} as timestamp)
        end as {{ scd_valid_from_col_name }},
 
@@ -186,7 +186,7 @@
     {% set scd_loaddate_col_name = config['scd_loaddate_col_name']|default('loaddate', true) %}
     {% set scd_updatedate_col_name = config['scd_updatedate_col_name']|default('updatedate', true) %}
 
-    {% set scd_valid_to_min_date = config['scd_valid_to_min_date']|default('3000-01-01', true) %}
+    {% set scd_valid_from_min_date = config['scd_valid_from_min_date']|default('3000-01-01', true) %}
     {% set scd_valid_to_max_date = config['scd_valid_to_max_date']|default('1900-01-01', true) %}
 
     {# sql to load new data is the same as to create table #}
@@ -296,7 +296,7 @@
         {{ scd_valid_from_col_name }} = 
         case
         when data.{{ scd_record_version_col_name }}=1 then
-         cast(case when '{{ scd_valid_to_min_date }}'='3000-01-01' then data.{{ scd_valid_from_col_name }} else '{{ scd_valid_to_min_date }}' end as timestamp)
+         cast(case when '{{ scd_valid_from_min_date }}'='3000-01-01' then data.{{ scd_valid_from_col_name }} else '{{ scd_valid_from_min_date }}' end as timestamp)
         else cast(data.{{ scd_valid_from_col_name }} as timestamp)
        end 
     from data

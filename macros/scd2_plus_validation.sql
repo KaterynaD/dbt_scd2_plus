@@ -1,4 +1,6 @@
-{% test scd2_plus_validation(model,unique_key,scd_valid_from_col_name,scd_valid_to_col_name) %}
+{% test scd2_plus_validation(model,unique_key='id',scd_valid_from_col_name='valid_from',scd_valid_to_col_name='valid_to') %}
+
+
 
 
 
