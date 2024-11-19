@@ -42,7 +42,7 @@ packages:
 ```
 ### Step 3: Configure model
 
-** Minimum configuration** 
+** Minimum configuration ** 
 
 ```
 {{ config(
@@ -65,7 +65,7 @@ order by id, SourceSystem_UpdatedDate
 
 ```
 
-** More customization** 
+** More customization ** 
 
 ```
 {{ config(
@@ -135,3 +135,19 @@ dbt run
 ```
 dbt test
 ```
+## Data Transformation Example
+
+### Initial Load
+
+**Staging Data**
+
+![alt text](images/StagingData.png)
+
+**scd2_plus Dimension**
+
+### Ongoing load with backdated transactions
+
+**Staging Data**
+
+**scd2_plus Dimension**
+
