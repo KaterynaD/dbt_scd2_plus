@@ -36,5 +36,5 @@ description,
 SourceSystem_UpdatedDate,
 Staging_LoadDate
 from {{ source('dwh','scd2_plus_staging_data') }}
-where (Staging_LoadDate='{{  var('loaddate') }}' or '{{  var('loaddate') }}' = '1900-01-01')
+where Staging_LoadDate='{{  var('loaddate') }}'/*to emulate ongoing load */
 order by id, SourceSystem_UpdatedDate, Staging_LoadDate

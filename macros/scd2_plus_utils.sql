@@ -1,6 +1,6 @@
 {% macro scd2_plus_build_table_sql(config, sql, create_flg=true) %}
 
-    {% set now = modules.datetime.datetime.now() %}
+    {% set now = modules.datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") %}
 
 
     {% set unique_key = config['unique_key'] %}
@@ -166,7 +166,7 @@
 
 {% macro scd2_plus_merge_sql(target, config, sql) %}
 
-    {% set now = modules.datetime.datetime.now() %}
+    {% set now = modules.datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") %}
 
     {% set unique_key = config['unique_key'] %}
     {% set updated_at = config['updated_at'] %}

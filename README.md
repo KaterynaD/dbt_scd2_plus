@@ -65,7 +65,7 @@ order by id, SourceSystem_UpdatedDate
 
 ```
 
-** More customization ** 
+** Full customization ** 
 
 ```
 {{ config(
@@ -137,17 +137,49 @@ dbt test
 ```
 ## Data Transformation Example
 
-### Initial Load
-
 **Staging Data**
 
-![alt text](images/StagingData.png)
+Staging data consists from 3 entities and 4 types of columns:
+- Service columns:
+  - Source system ID is an unique identifier. it's a required column for scd2_plus - **unique_key**
+  - Source System UpdatedDate reflects a date when the corresponding entity was created or updated in the source system. It's a required column for scd2_plus - **updated_at**
+  - Staging LoadDate is the date when the record was added into Staging area. It's added to demo the backdated transactions issue and emulate incremental load in scd2. It's nice to have for scd2_load (**loaded_at**). The column is used in the de-duplication to prioritize the latest coming data with the same ID and UpdatedDate, but possible different meaningful columns. Without Staging LoadDate, the outcome is unpredictable in a case of duplicates. One, random, record will be selected.
+  - Comment is a text to describe expected load into scd2
+- The columns where a change means fixing an issue. No need to create a new record in scd2. they should be always the same in all versions of the same entity. They are candidates for **punch_thru_cols**
+  - Name
+  - BirthdayDate
+- A descriptive column to describe something about the changes in an entity, not significant enough to create a new row. It's **update_cols**
+- And the rest of the columns should create a new row in scd2 when theer is a change. They are **check_at**.
+  - Label
+  - Amount
 
-**scd2_plus Dimension**
+Backdated transactions are highlighted in red. The records have more recent Source System UpdatedDate then already existed versions of the same entities. They may be added into Staging with a delay for whatever reason or, even, the update itself should have been happened earlier in Source System, byt did not. 
 
-### Ongoing load with backdated transactions
+![img](images/StagingData.png)
 
-**Staging Data**
+***Backdated transactions Insurance Industry example***: Your Auto policy due to renewal on Jan 15. An Insurance transaction system automatically creates a renewal transaction 2 months ahead, mid November (Futuredated transaction - issued in Nov 15, but effective Jan 15). You buy a new car on Dec 12 and add the new car to your Auto policy immediately. The system creates a new transaction for your current Auto policy (Normal transaction - issued on Dec 12 and effective Dec 12)  and a transaction for the renewal policy (Backdated transaction - issued in Dec 12, after the 1st one issued on Nov 15 and effective the same, Jan 15).
 
-**scd2_plus Dimension**
+10 days later you notify the insurer, your teen son drives now your old car since Dec 12. The system creates a new transaction for your current Auto policy (Backdated transaction - issued on Dec 22 and effective Dec 12)  and a transaction for renewal policy (Backdated transaction - issued on Dec 22, after the 2nd one issued on Dec 12 and effective Jan 15). 
+
+You start paying more for your old car coverage since Dec 12 because of the teen-driver starts driving the car on Dec 12, not Dec 22 when you notified your insurer.
+
+Driver Birthday Date is an attribute of DIM_DRIVER scd2 and transactions reflecting increase in the premium should correspond to a proper risk attribute (Driver age) value. **Effective Date** is used as **update_cols**. It does not matter when the transaction was added in the system, only when the risk increased is important. Birthday Date is **check_cols** in this scenario, because if there is an error, not just the attribute should be fixed, but also a new transaction should be issued to adjust the premium.
+
+
+
+**Fully customized scd2_plus dimension**
+
+The data are the same (except loaded_at and updated_at) with one time (batch) and incremental load because  **loaded_at** is configured.
+![img](images/scd2_plus_full_config.png)
+
+**Minimum configuration of scd2_plus dimension**
+
+In a case when **loaded_at** is not added in the configuration, only incremental load produces the expected result.
+
+![img](images/scd2_plus_min_config_incremental_load.png)
+
+One time (batch) load can not order duplicated records properly without **loaded_at**.
+Wrong values highlighted in red.
+
+![img](images/scd2_plus_min_config_one_time_load.png)
 
