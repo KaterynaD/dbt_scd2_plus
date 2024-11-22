@@ -43,7 +43,7 @@ There are 4 use cases and corresponding test data in seeds:
 
     ```
     chmod +x scd2_plus_full_config_incremental_load_test.sh
-    ./sd2_plus_full_config_incremental_load_test.sh
+    ./scd2_plus_full_config_incremental_load_test.sh
     ```
     or run individual dbt commands from the shell file manually.
 

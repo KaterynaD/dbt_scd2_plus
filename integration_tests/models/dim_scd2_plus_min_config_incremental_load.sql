@@ -7,7 +7,6 @@
    
 
    updated_at='SourceSystem_UpdatedDate'
-   
 
 ) }}
 

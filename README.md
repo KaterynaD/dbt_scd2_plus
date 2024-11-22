@@ -38,8 +38,15 @@ Include  dbt_scd2_plus package  in your packages.yml file.
 
 ```
 packages:
-  - git: "https://github.com/KaterunaD/dbt_scd2_plus"
+  - git: "https://github.com/KaterynaD/dbt_scd2_plus"
 ```
+
+and run
+
+```
+dbt deps 
+```
+
 ### Step 3: Configure model
 
 **Minimum configuration** 
