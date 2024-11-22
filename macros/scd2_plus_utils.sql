@@ -69,7 +69,7 @@
        *,
        /*for Update cols: Need a value from the next record even if it is not included in the final dim */
       {% for c in update_cols %} 
-       last_value({{ c }}) over(partition by id, scd_hash order by {{ updated_at }} RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) as last_{{ c }} ,
+       last_value({{ c }}) over(partition by id, scd_hash order by {{ updated_at }} rows between unbounded preceding and unbounded following) as last_{{ c }} ,
       {% endfor %}
        lag(scd_hash) over(partition by {{ unique_key }} order by {{ updated_at }}) prev_scd_hash,
        lead(scd_hash) over(partition by {{ unique_key }} order by {{ updated_at }}) next_scd_hash
@@ -87,7 +87,7 @@
       {% endfor %}
        /* Punch through cols - (Kimbal Type I) setting: These attributes in all the dimension record versions are updated*/
       {% for c in punch_thru_cols %} 
-       last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) as {{ c }}, 
+       last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }}, 
       {% endfor %}
        /*Update cols - These attributes in the last dimension record version are updated.*/
       {% for c in update_cols %} 
@@ -316,7 +316,7 @@
      select distinct
       {{ unique_key }},     
      {% for c in punch_thru_cols %} 
-       last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) as {{ c }} {% if not loop.last %} , {% endif %}
+       last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }} {% if not loop.last %} , {% endif %}
      {% endfor %}
      from {{ int_table_name }}
     )
@@ -341,7 +341,7 @@
     select distinct
      {{ unique_key }},     
     {% for c in update_cols %} 
-      last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) as {{ c }} {% if not loop.last %} , {% endif %}
+      last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }} {% if not loop.last %} , {% endif %}
     {% endfor %}
     from {{ int_table_name }}
     )
