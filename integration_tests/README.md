@@ -2,6 +2,14 @@
 
 To run the project add your specific **integration_tests** profile.
 
+dbt_utils and dbt_scd2_plus are included in packages.yml
+
+Run
+
+```
+dbt deps 
+```
+
 Staging data and etalon tests data are provided in **seeds** folder as csv files.
 
 Before testing run

@@ -145,6 +145,8 @@ models:
           scd_valid_to_col_name:  'valid_to_dt'
 
 ```
+Out of the box, dbt unique test is recommended for the dimension surrogate key column (**scd_id**).
+
 
 ### Step 5: Run dbt
 
