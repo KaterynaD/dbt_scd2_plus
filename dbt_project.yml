@@ -1,6 +1,6 @@
 
 name: 'dbt_scd2_plus'
-version: '0.0.1'
+version: 'v0.0.1'
 
 require-dbt-version: ">=1.8.1"
 
