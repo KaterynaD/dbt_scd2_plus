@@ -76,7 +76,7 @@ There are 4 use cases and corresponding test data in seeds:
     To test run:
 
     ```
-    dbt test --select dim_scd2_plus_min_config_test_data        
+    dbt test --select dim_scd2_plus_min_config_one_time_load        
     ```
     **IMPORTANT!** This test most likely fail. It's expected output. There are duplicate rows (the same **unique_key** and **updated_at** but different **Amount**).
     Minimum configuration does not include **loaded_at** column (**Staging_LoadDate**) and the deduplication logic does not know what record should take precedence and use any record as the main one. 
