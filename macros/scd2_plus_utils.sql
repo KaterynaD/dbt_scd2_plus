@@ -279,17 +279,7 @@
           data.new_data=2;
 
     /*----------------Adjusting {{ valid_from }} - {{ valid_to }} in a case of backdated transactions*/
-    with data as 
-    (
-     select
-      {{ unique_key }},
-      {{ scd_id_col_name }},
-      {{ scd_valid_from_col_name }},
-      coalesce(lead({{ scd_valid_from_col_name }}) over (partition by {{ unique_key }} order by {{ scd_valid_from_col_name }}), cast(case when '{{ scd_valid_to_max_date }}'='1900-01-01' then null else '{{ scd_valid_to_max_date }}' end as timestamp)) as {{ scd_valid_to_col_name }},
-      row_number() over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }}) as {{ scd_record_version_col_name }}
-     from {{ target }} dim
-     where {{ unique_key }} in (select {{ unique_key }} from {{ target }} where {{ scd_loaddate_col_name }}='{{ loaddate }}')
-    )
+
     update {{ target }}
     set {{ scd_valid_to_col_name }}=data.{{ scd_valid_to_col_name }},
         {{ scd_record_version_col_name }} = data.{{ scd_record_version_col_name }},
@@ -299,7 +289,16 @@
          cast(case when '{{ scd_valid_from_min_date }}'='3000-01-01' then data.{{ scd_valid_from_col_name }} else '{{ scd_valid_from_min_date }}' end as timestamp)
         else cast(data.{{ scd_valid_from_col_name }} as timestamp)
        end 
-    from data
+    from (
+     select
+      {{ unique_key }},
+      {{ scd_id_col_name }},
+      {{ scd_valid_from_col_name }},
+      coalesce(lead({{ scd_valid_from_col_name }}) over (partition by {{ unique_key }} order by {{ scd_valid_from_col_name }}), cast(case when '{{ scd_valid_to_max_date }}'='1900-01-01' then null else '{{ scd_valid_to_max_date }}' end as timestamp)) as {{ scd_valid_to_col_name }},
+      row_number() over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }}) as {{ scd_record_version_col_name }}
+     from {{ target }} dim
+     where {{ unique_key }} in (select {{ unique_key }} from {{ target }} where {{ scd_loaddate_col_name }}='{{ loaddate }}')
+    ) data
     where {{ target }}.{{ unique_key }} = data.{{ unique_key }} and 
           {{ target }}.{{ scd_id_col_name }} = data.{{ scd_id_col_name }};
       
@@ -311,22 +310,21 @@
 
     {% if  punch_thru_cols|length > 0 %}
 
-    with data as 
-    (
-     select distinct
-      {{ unique_key }},     
-     {% for c in punch_thru_cols %} 
-       last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }} {% if not loop.last %} , {% endif %}
-     {% endfor %}
-     from {{ int_table_name }}
-    )
+
     update {{ target }}
     set 
     {% for c in punch_thru_cols %} 
      {{ c }} = data.{{ c }} ,
     {% endfor %}
      {{ scd_updatedate_col_name }} = cast('{{ loaddate }}' as timestamp)
-    from data
+    from     (
+     select distinct
+      {{ unique_key }},     
+     {% for c in punch_thru_cols %} 
+       last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }} {% if not loop.last %} , {% endif %}
+     {% endfor %}
+     from {{ int_table_name }}
+    ) data
     where {{ target }}.{{ unique_key }} = data.{{ unique_key }};
 
     {% endif %}
@@ -336,22 +334,20 @@
 
     {% if  update_cols|length > 0 %}
 
-    with data as 
-    (
-    select distinct
-     {{ unique_key }},     
-    {% for c in update_cols %} 
-      last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }} {% if not loop.last %} , {% endif %}
-    {% endfor %}
-    from {{ int_table_name }}
-    )
     update {{ target }}
     set 
     {% for c in update_cols %} 
      {{ c }} = data.{{ c }} ,
     {% endfor %}
       {{ scd_updatedate_col_name }} = cast('{{ loaddate }}' as timestamp)
-    from data
+    from     (
+    select distinct
+     {{ unique_key }},     
+    {% for c in update_cols %} 
+      last_value({{ c }}) over(partition by {{ unique_key }} order by {{ scd_valid_from_col_name }} rows between unbounded preceding and unbounded following) as {{ c }} {% if not loop.last %} , {% endif %}
+    {% endfor %}
+    from {{ int_table_name }}
+    ) data
     where {{ target }}.{{ unique_key }} = data.{{ unique_key }} and
           ({{ target }}.{{ scd_valid_to_col_name }} is null or 
            {{ target }}.{{ scd_valid_to_col_name }}=cast(case when '{{ scd_valid_to_max_date }}'='1900-01-01' then null else '{{ scd_valid_to_max_date }}' end as timestamp));
