@@ -42,7 +42,7 @@ models:
       - dbt_scd2_plus.scd2_plus_validation:
           unique_key: id
           scd_valid_from_col_name: valid_from
-          scd_valid_to_col_name:  valid_to'
+          scd_valid_to_col_name:  valid_to
       - dbt_utils.equality:
           compare_model: ref('dim_scd2_plus_min_config_test_data')
           compare_columns:
