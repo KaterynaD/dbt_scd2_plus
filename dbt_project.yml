@@ -1,6 +1,6 @@
 
 name: 'dbt_scd2_plus'
-version: '1.0.0'
+version: '0.0.1'
 
-require-dbt-version: ">=1.8.8"
+require-dbt-version: ">=1.8.1"
 
