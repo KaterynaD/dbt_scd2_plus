@@ -22,7 +22,9 @@ Staging data: **scd2_plus_staging_data.csv**
 
 ![img](../images/StagingData.png)
 
-There are 4 use cases and corresponding test data in seeds:
+There are 4 test use cases, 4 configured models and 2 types of the test data in seeds.
+
+**IMPORTANT!** There are no differences in the model configuration for one time load and incremental load. They are separated in the project only for the tests purposes.  Both types of load produce the same data as in 2 test data seeds: for full customization and minimum configuration.
 
 - ## 1. Full Customization
     - ### One time (batch) load
