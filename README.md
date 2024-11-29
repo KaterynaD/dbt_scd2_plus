@@ -13,8 +13,8 @@ This DBT package provides a materialization that builds advanced version of slow
 - Along with Kimball Type II setting in **check_cols** , you can configure Kimball Type I setting in **punch_thru_cols** column list. These attributes in **all** dimension record versions are updated.
 - **update_cols** column lists are updated only in the **last** dimension record version.
 - **LoadDate** and **UpdateDate** can be populated from **loaddate** value provided (variable), if you want to have the same timestamp in all your models or generated in the macros now() timestamp if nothing was configured.
-- The first entity record **valid_from** in the dimension can be the first **updated_at value** (default) or any timestamp you provide in **scd_valid_from_min_date** . Setting **scd_valid_from_min_date** to **1900-01-01** allows to use the first entity record in a fact table transaction with transaction dates before the entity first **updated_at** value e.g. before the entity was born.
-- The last entities record  **valid_to** value in the dimension is **NULL** by default, but you can override it with **scd_valid_to_max_date** . Setting **scd_valid_to_max_date** to something like **3000-01-01** will simplify joining fact records to the dimension avoiding **NULLs** in joins.
+- The first entity record **valid_from** in the dimension can be the first **updated_at** value (default) or any timestamp you provide in **scd_valid_from_min_date** . Setting **scd_valid_from_min_date** to **1900-01-01** allows to use the first entity record in a fact table transaction with transaction dates before the entity first **updated_at** value e.g. before the entity was born. You can use any date older then the oldest possible **updated_at** value.
+- The last entities record  **valid_to** value in the dimension is **NULL** by default, but you can override it with **scd_valid_to_max_date** . Setting **scd_valid_to_max_date** to something like **3000-01-01** will simplify joining fact records to the dimension avoiding **NULLs** in joins. You can use any date in a future after the latest possible **updated_at** value.
 - The materialization does not handle soft deletes and does not attempt to adjust the table structure for new or deleted columns in the query. (See also below)
 - **scd_plus** custom materialization does **not** support **Model Contract**.
 - There is also **scd2_plus_validation** test to check consistency in **valid_from** and **valid_to** . It means no gaps in or intersection of versions periods in an entity. If not default names are set in **scd_valid_from_col_name** , **scd_valid_to_col_name**, they should be specified in the test.
@@ -23,13 +23,13 @@ Only columns configured in **unique_key, updated_at**, **check_cols** , **punch_
 
 Each **scd2_plus** materialized dimension always has these service columns:
 
-- - Dimension surrogate key is a combination of **unique_key** and **updated_at**. It's **scd_id** by default, but can be configured in **scd_id_col_name**
-    - Dimension record version **start** timestamp is **valid_from** by default, but can be customized in **scd_valid_from_col_name**
-    - Dimension record version **end** timestamp is **valid_to** by default, but can be customized in **scd_valid_to_col_name**
-    - Dimension record version **ordering number** is **record_version** by default and custom column name can be configured in **scd_record_version_col_name**
-    - Data loaded in a record at **LoadDate** timestamp, customizable in **scd_loaddate_col_name**
-    - Data updated in a record at **UpdateDate** , customizable in **scd_updatedate_col_name**
-    - **scd_hash** column is used to track changes in check_cols.
+- Dimension surrogate key (varchar(50)) is a combination of **unique_key** and **updated_at**. It's **scd_id** by default, but can be configured in **scd_id_col_name**. 
+- Dimension record version **start** timestamp is **valid_from** by default, but can be customized in **scd_valid_from_col_name**.
+- Dimension record version **end** timestamp is **valid_to** by default, but can be customized in **scd_valid_to_col_name**.
+- Dimension record version **ordering number** is **record_version** (integer) by default and custom column name can be configured in **scd_record_version_col_name**.
+- Data loaded in a record at **LoadDate** timestamp, customizable in **scd_loaddate_col_name**.
+- Data updated in a record at **UpdateDate** timestamp, customizable in **scd_updatedate_col_name**.
+- **scd_hash** column (varchar(50)) is used to track changes in check_cols.
 
 ## How do I use the dbt package?
 
