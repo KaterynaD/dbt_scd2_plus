@@ -125,7 +125,7 @@
       where coalesce(prev_scd_hash,'~')<>scd_hash
     )
       select
-       {{ scd_id_col_name }},
+       {{ scd_id_col_name }}::varchar(50) as {{ scd_id_col_name }},
     
     {# The query is used in "create table as select..." and "insert/update" in an existing table #}
     {# scd_valid_from_min_date should be used (if configured) only in "create table as select.."#}
@@ -145,7 +145,7 @@
     {% endif %}
 
        {{ scd_valid_to_col_name }},
-       {{ scd_record_version_col_name }},
+       {{ scd_record_version_col_name }}::integer as {{ scd_record_version_col_name }},
        {{ unique_key }},
       {% for c in check_cols %} 
        {{ c }}, 
@@ -158,7 +158,7 @@
       {% endfor %}       
        cast('{{ loaddate }}' as timestamp) as    {{ scd_loaddate_col_name }},
        cast('{{ loaddate }}' as timestamp) as    {{ scd_updatedate_col_name }},
-       scd_hash
+       scd_hash::varchar(50) as scd_hash
       from final_data
     /*final query - only rows with a change in scd_hash*/
 
