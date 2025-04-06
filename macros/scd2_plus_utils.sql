@@ -47,7 +47,7 @@
      /*Random record is loaded if there are few records with the same unique_key,updated_at and loaded_at. */
      select
       *,
-      row_number() over(partition by {{ unique_key }}, {{ updated_at }} order by {{ loaded_at }} desc) rn
+      row_number() over(partition by {{ unique_key }},{{ updated_at }} order by {{ loaded_at }} desc) rn
      from sbq
     )
     ,raw_data as 
