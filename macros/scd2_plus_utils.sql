@@ -209,7 +209,23 @@
     (
     /*-- we need existing data from dim to compare with new add/not add with/without changes --*/
     select
-     *
+       {{ scd_id_col_name }},  
+       {{ scd_valid_from_col_name }},
+       {{ scd_valid_to_col_name }},
+       {{ scd_record_version_col_name }},
+       {{ unique_key }},
+      {% for c in check_cols %} 
+       {{ c }}, 
+      {% endfor %}
+      {% for c in punch_thru_cols %} 
+       {{ c }},
+      {% endfor %}
+      {% for c in update_cols %} 
+       {{ c }},
+      {% endfor %}
+       {{ scd_loaddate_col_name }}, 
+       {{ scd_updatedate_col_name }},
+       scd_hash
     from  {{ target }} dim
     where dim.{{ unique_key }} in (select stg.{{ unique_key }} from stg_data stg)
     )
@@ -238,6 +254,25 @@
 
     /*insert new  in the target table */
     insert into {{ target }}
+    (
+       {{ scd_id_col_name }},  
+       {{ scd_valid_from_col_name }},
+       {{ scd_valid_to_col_name }},
+       {{ scd_record_version_col_name }},
+       {{ unique_key }},
+      {% for c in check_cols %} 
+       {{ c }}, 
+      {% endfor %}
+      {% for c in punch_thru_cols %} 
+       {{ c }},
+      {% endfor %}
+      {% for c in update_cols %} 
+       {{ c }},
+      {% endfor %}
+       {{ scd_loaddate_col_name }}, 
+       {{ scd_updatedate_col_name }},
+       scd_hash
+    )
     select 
        {{ scd_id_col_name }},  
        {{ scd_valid_from_col_name }},
